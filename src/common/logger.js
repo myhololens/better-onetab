@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/browser'
+import * as Integrations from '@sentry/integrations'
 import {SENTRY_DSN} from './constants'
 import {isBackground} from './utils'
 import manifest from '../manifest.json'
@@ -20,15 +21,17 @@ const genMethods = () => {
 
 logger.init = (opts = {}) => {
   genMethods()
-  window.onerror = window.onunhandledrejection = err => {
-    Sentry.captureException(err)
+  if (DEBUG) {
+    window.Sentry = Sentry
+    return
   }
+
   const {Vue} = opts
   const integrations = Sentry.defaultIntegrations
-  if (Vue) integrations.push(new Sentry.Integrations.Vue({Vue}))
+  if (Vue) integrations.push(new Integrations.Vue({Vue}))
   Sentry.init({
     environment: DEBUG ? 'dev' : 'production',
-    release: manifest.version,
+    release: 'v' + manifest.version,
     dsn: SENTRY_DSN,
     debug: DEBUG,
     integrations,
@@ -37,8 +40,6 @@ logger.init = (opts = {}) => {
   Sentry.configureScope(async scope => {
     scope.setTag('background', await isBackground())
   })
-
-  if (DEBUG) window.Sentry = Sentry
 }
 
 export default logger

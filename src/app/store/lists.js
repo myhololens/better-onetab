@@ -54,6 +54,9 @@ export default {
     pinnedList(state, getters) {
       return getters.indexedLists.filter(list => list.pinned)
     },
+    titledList(state, getters) {
+      return getters.indexedLists.filter(list => list.title)
+    },
     getPageLength(state) {
       return size => Math.ceil(size / state.opts.listsPerPage)
     },
@@ -121,7 +124,9 @@ export default {
     itemClicked({dispatch, state}, [listIndex, tabIndex]) {
       const action = state.opts.itemClickAction
       if (action === 'open-and-remove') {
-        return dispatch('removeTab', [listIndex, tabIndex])
+        setTimeout(() => {
+          dispatch('removeTab', [listIndex, tabIndex])
+        }, 0)
       }
     },
     removeList({commit, state}, listIndex) {
